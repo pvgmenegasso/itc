@@ -1,5 +1,8 @@
    
 
+from io import FileIO
+
+
 class Transition():
     pass
 
@@ -154,7 +157,7 @@ class TuringMachine():
         self.__states = states
         self.__tape = None
 
-    def verificaEntrada(self, entrada: str):
+    def verificaEntrada(self, entrada: str, stream : FileIO):
         """
         Função responsável por controlar a lógica da máquina em si
         Modificar aqui caso queira alterar a saída
@@ -162,9 +165,9 @@ class TuringMachine():
         result = self.__processaEntrada(entrada)
 
         if result:
-            print("aceita")
+            stream.write("aceita\n")
             return
-        print("rejeita")
+        stream.write("rejeita\n")
         return
 
     def __processaEntrada(self, entrada : str):
