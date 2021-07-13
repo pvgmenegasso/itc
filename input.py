@@ -27,5 +27,66 @@
     string must contain a maximum of 20 symbols
 """
 
-def input():
-    pass
+import turing_machine as tm
+
+def input(**kwargs):
+
+    docName = "entrada.txt"
+
+    for arg, value in kwargs:
+        if arg == "file":
+            docName = value
+
+
+    stream = open(docName, 'r')
+
+    # First we read the number of states:
+    nStates = int(stream.readline().strip())
+
+    states : list[tm.State] = []
+
+    for i in range(0, nStates):
+        states.append(tm.State(i))
+
+
+    # Now we read the second line which contains the number of symbols + the symbols themselves
+    line2 = stream.readline().strip()
+    line2 = line2.split(' ')
+    nSymbols = int(line2[0])
+    symbols = []
+    for i in range(1, nSymbols+1):
+        symbols.append(line2[i])
+    print("Symbols = "+str(symbols))
+    print("nStates = "+str(nStates))
+
+    # Similarly for the 3rd line
+    line3 = stream.readline().strip()
+    line3 = line3.split(' ')
+    nNotTermSymbols = int(line3[0])
+    notTermsymbols = []
+    for i in range(1, nNotTermSymbols+1):
+        notTermsymbols.append(line3[i])
+    print("Symbols = "+str(notTermsymbols))
+    print("nNotTerm = "+str(nNotTermSymbols))
+
+    acceptState = int(stream.readline().strip())
+
+    nTransitions = int(stream.readline().strip())
+
+    transitions = []
+
+    for i in range(nTransitions):
+        line = stream.readline().strip()
+        line = line.split(' ')
+        originState = int(line[0])
+        symbolRead = line[1]
+        destinationState = line[2]
+        symbolWrite = line[3]
+        movement = line[4]
+        states[originState].addTransition(tm.Transition(destinationState, symbolRead, symbolWrite, movement))
+
+    for state in states:
+        state.printTransitions()
+
+    return nStates, nSymbols, symbols, nNotTermSymbols, notTermsymbols, acceptState
+
