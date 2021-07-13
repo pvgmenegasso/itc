@@ -80,13 +80,26 @@ def input(**kwargs):
         line = line.split(' ')
         originState = int(line[0])
         symbolRead = line[1]
-        destinationState = line[2]
+        destinationState = int(line[2])
         symbolWrite = line[3]
         movement = line[4]
-        states[originState].addTransition(tm.Transition(destinationState, symbolRead, symbolWrite, movement))
+        states[originState].addTransition(tm.Transition(states[destinationState], symbolRead, symbolWrite, movement))
 
     for state in states:
         state.printTransitions()
 
-    return nStates, nSymbols, symbols, nNotTermSymbols, notTermsymbols, acceptState
+    nInputs = int(stream.readline().strip())
+
+    inputs : list[str] = []
+
+    for i in range(nInputs):
+        string = stream.readline().strip().replace("-", "B")
+        inputs.append(string)
+
+    for input in inputs:
+        print(input)
+
+   
+    # retorna todos os dados colhidos
+    return nStates, states, nSymbols, symbols, nNotTermSymbols, notTermsymbols, acceptState, inputs
 

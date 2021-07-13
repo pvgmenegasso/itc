@@ -16,7 +16,8 @@ class State():
             self.__transitions = args[1]
 
 
-
+    def __str__(self):
+        return str(self.__number)
         
 
     def addTransition(self, transition : Transition):
@@ -28,15 +29,22 @@ class State():
     def setTransitions(self, transitions : list[Transition]):
         self.__transitions = transitions
 
+    def hasTransition(self, symbol : bytes):
+        for transition in self.__transitions:
+            if transition.getReadSymbol() == symbol:
+                return transition
+        return False
+
     def printTransitions(self):
         if len(self.__transitions) == 0:
             print("")
             return
         for transition in self.getTransitions():
             print(transition)
+
   
 
-class Transition(Transition):
+class Transition():
     """
     Defines a transition
 
@@ -69,10 +77,22 @@ class Transition(Transition):
         self.__writeSymbol = writeSymbol
         self.__movement = movement
 
+    def getMovement(self):
+        return self.__movement
+
+    def getDestination(self):
+        return self.__destinationState
+
+    def getReadSymbol(self):
+        return self.__readSymbol
+
+    def getWriteSymbol(self):
+        return self.__writeSymbol
+
     def __str__(self):
         string = ""
 
-        string += "Destination state: "+self.__destinationState+" "
+        string += "Destination state: "+str(self.__destinationState)+" "
         string += "Read symbol: "+self.__readSymbol+" "
         string += "Write symbol: "+self.__writeSymbol+" "
         string += "Movement: "+self.__movement
@@ -82,9 +102,10 @@ class Transition(Transition):
       
 class Tape():
 
+    __lambda = "B"
+
     def __init__(self, tape = ""):
         self.__tape = dict((enumerate(tape)))
-        self.__lambda = " "
         self.__posAtual = 0
 
     def __str__(self):
@@ -95,14 +116,14 @@ class Tape():
 
         return string
 
-    def __read(self):     
+    def read(self):     
         if self.__posAtual in self.__tape:
             return self.__tape[self.__posAtual]
 
         else:
             return Tape.__lambda    
 
-    def __write(self, **kwargs):
+    def write(self, **kwargs):
         index = self.__posAtual;
         symbol = Tape.__lambda
 
@@ -114,12 +135,12 @@ class Tape():
 
         self.__tape[index] = symbol
 
-    def __right(self):
-        self.__posAtual = self.__posAtual - 1
+    def right(self):
+        self.__posAtual = self.__posAtual + 1
 
 
-    def __left(self):
-        self.__posAtual = self.__posAtual + 1 
+    def left(self):
+        self.__posAtual = self.__posAtual - 1 
 
 
      
@@ -127,16 +148,65 @@ class Tape():
 
 class TuringMachine():
 
-    def __init__(self, nEstados : int, terminal : list[bytes],
-    nonTerminal : list[bytes], acceptanceState: int, states : list[State]):
-
-        self.__nEstados = nEstados
-        self.__terminalSymbols = terminal
-        self.__nonTerminal = nonTerminal
+    def __init__(self, acceptanceState: int, states : list[State]):
+        self.__currState = 0
         self.__acceptance = acceptanceState
         self.__states = states
-        self.__Tape = Tape() # Fita da máquina
+        self.__tape = None
+
+    def verificaEntrada(self, entrada: str):
+        """
+        Função responsável por controlar a lógica da máquina em si
+        Modificar aqui caso queira alterar a saída
+        """
+        result = self.__processaEntrada(entrada)
+
+        if result:
+            print("aceita")
+            return
+        print("rejeita")
+        return
+
+    def __processaEntrada(self, entrada : str):
+        # Inicia a fita
+        self.__tape = Tape(entrada)
+        # volta para estado inicial
+        self.__currState = 0 
+
+        # While no return is given
+        result = self.__transiciona(self.__tape.read())
+        while result != True and result != False:
+            result = self.__transiciona(self.__tape.read())
+
+        return result
         
-    def processaEntrada(entrada : Tape):
-        pass
+
+    def __transiciona(self, symbol : bytes):
+        # existe uma transição para esse símbolo ?
+        result = self.__states[self.__currState].hasTransition(symbol)
+        
+        # nao existe transicao
+        if result == False:
+            # É estado de aceitação ?
+            if self.__currState == self.__acceptance:
+                return True
+            else:
+                # Erro !
+                return False
+
+        # Existe transição, executa !
+        # Escreve na fita !
+        self.__tape.write(symbol = result.getWriteSymbol())
+
+        # Move
+        if result.getMovement() == 'R':
+            self.__tape.right()
+        elif result.getMovement() == 'L':
+            self.__tape.left()
+        elif result.getMovement() == 'S':
+            return False
+
+        # Muda de estado para o destino
+        self.__currState = self.__states.index(result.getDestination())
+
 
