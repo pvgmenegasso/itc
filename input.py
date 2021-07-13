@@ -99,7 +99,8 @@ def input(**kwargs):
     for input in inputs:
         print(input)
 
-   
+    stream.close()
+
     # retorna todos os dados colhidos
     return nStates, states, nSymbols, symbols, nNotTermSymbols, notTermsymbols, acceptState, inputs
 

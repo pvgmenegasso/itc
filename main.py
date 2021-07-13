@@ -13,3 +13,5 @@ stream = open("output.txt", mode="w+")
 # Processa todas as entradas
 for inputString in inputs:
     machine.verificaEntrada(inputString, stream)
+
+stream.close()
